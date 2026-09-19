@@ -1,0 +1,36 @@
+# Private host software must never enter the public repository.
+.private-host/
+thermolab.py
+*.py
+*.pdf
+.env
+.env.*
+
+# Regenerable Vivado products and local state.
+*.cache/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+thermolab.srcs/utils_1/
+.Xil/
+*.jou
+*.log
+*.str
+*.dcp
+*.bit
+*.bin
+*.wdb
+*.pb
+*.rpx
+*.zip
+*.xpr.backup
+
+# Local measurements and Python environments.
+*_data.csv
+*_plot.png
+__pycache__/
+.venv/
+.DS_Store
+Thumbs.db
