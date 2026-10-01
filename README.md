@@ -46,7 +46,7 @@ The v2.00 source defines three regions, `RA`, `RB`, and `RC`, each with **9,000 
 
 An 8-bit PWM controls switching duty. The supply governor reduces the duty ceiling below approximately 0.970 V VCCINT and clears the ceiling and applied duty below approximately 0.938 V. Recovery is gradual. These are implemented thresholds, not a guarantee that every USB port or board will reach the same temperature.
 
-The intended floorplan places A near the I/O sensor, B near the XADC, and C farther from both. Those physical placements require the original XDC pblocks, which are **not present in this checkout**.
+The regions are meant to sit in different parts of the die: one near the I/O ring's bank, one near the XADC, and one away from both. That placement comes from pblocks in the constraints file, which is **not present in this checkout**, so which letter sits where should be checked against the implemented design before comparing runs by region.
 
 ### Temperature monitoring and interlocks
 
@@ -58,7 +58,7 @@ The intended floorplan places A near the I/O sensor, B near the XADC, and C fart
 
 Conversion liveness tracks EOC activity; it is not an independent guarantee that every reported temperature is fresh. Board operation and safety behavior must be checked with the complete, correctly constrained hardware build.
 
-## Measurement method and reported results
+## Measurement method and results
 
 The analysis uses oscillator period as a relative delay proxy:
 
@@ -72,16 +72,17 @@ For a fixed ring topology, this captures relative delay changes without claiming
 
 The experiment can record a cooldown after heating, soak at a staircase of duty levels, or monitor without heating. Repeating runs with A, B, and C helps examine how local heating and thermal gradients affect the relationship between the XADC reading and ring delay. Supply-voltage changes are recorded because they can also affect frequency.
 
-Earlier project results reported in the author's resume:
+Measured runs, refit with the method above (cooldown samples only, 100 ms windows):
 
-| Measurement | Reported value |
-| --- | --- |
-| Samples | 208 |
-| Temperature range | 42.8-78.4 C |
-| I/O delay coefficient | 0.0481 %/C; R-squared = 0.98 |
-| Core-LUT delay coefficient | 0.0176 %/C; R-squared = 0.91 |
+| Run | Build | Cooldown samples | Span | I/O ring | LUT ring |
+| --- | --- | --- | --- | --- | --- |
+| 2026-07-15 | earlier 7-pad I/O ring | 231 | 40.4-75.9 C | +0.0436 %/C, R-squared 0.972 | +0.0079 %/C, R-squared 0.560 |
+| 2026-08-04 | v2.00, heater C | 252 | 41.2-65.8 C | +0.0470 %/C, R-squared 0.984 | +0.0096 %/C, R-squared 0.663 |
+| 2026-09-02 | v2.00, heater B | 91 | 47.8-66.4 C | +0.0422 %/C, R-squared 0.991 | +0.0019 %/C, R-squared 0.079 |
 
-These are historical reported measurements, not results regenerated from this checkout. Their raw dataset is not included here. The resume describes an approximately 48,000-flip-flop heater; the uploaded v2.00 source uses the three-region configuration above. The repository's earlier 64-ring/64-heater description also does not describe this source revision. Some source comments retain older pad counts; the instantiated top-level parameters determine the current configuration.
+In the v2.00 runs the 21-pad I/O ring ran at 4.43-4.60 MHz and the 33-stage LUT ring at 36.6-38.5 MHz. VCCINT stayed at or above 0.988 V and the governor's low-voltage flag never set. A heater-A run on 2026-09-09 stopped during heat-up, before any cooldown samples, and is not included. The runs do not record the board serial.
+
+During heat-up the LUT ring's delay steps with heater duty (about 0.02 % per duty count, roughly 5 % at full duty) and returns within one sample when the heater stops, so heat-up samples are excluded from the fit. The run CSVs are not included in this repository. Some source comments retain older pad counts; the instantiated top-level parameters determine the current configuration.
 
 ## Repository contents
 
